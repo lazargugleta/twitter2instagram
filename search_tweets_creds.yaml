@@ -1,5 +1,6 @@
 search_tweets_premium:
-  endpoint: <FULL_URL_OF_ENDPOINT>
+  account_type: premium
   consumer_key: <CONSUMER_KEY>
   consumer_secret: <CONSUMER_SECRET>
+  endpoint: https://api.twitter.com/1.1/tweets/search/30day/my_env_name.json # replace my_env_name with your dev environment name
 
