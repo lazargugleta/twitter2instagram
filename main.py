@@ -10,16 +10,14 @@ from searchtweets import load_credentials, collect_results, gen_rule_payload
 premium_search_args = load_credentials(filename="./search_tweets_creds.yaml",
                  yaml_key="search_tweets_premium",
                  env_overwrite=False)
-
-rule = gen_rule_payload("from:orangebook_", results_per_call=10) # testing with a sandbox account
-print(rule)
+twitter_username = 'orangebook_'
+rule = gen_rule_payload("from:{}".format(twitter_username), results_per_call=10) # testing with a sandbox account
 
 
 tweets = collect_results(rule,
                          max_results=10,
                          result_stream_args=premium_search_args) # change this if you need to
 
-# [print(tweet.all_text, end='\n\n') for tweet in tweets[0:10]]
 
 
 # unsplash part
@@ -33,7 +31,9 @@ from io import BytesIO
 def linkFetch():
     query = "office"
     orientation = "squarish"
-    url = "https://api.unsplash.com/photos/random?topics=spirituality&content_filter=high&query=people&orientation=squarish&client_id=4PpAlHOuRvO4mse8lIdiTVGUcKUgpNKHVcVSHReIhP0"
+    # set different topics, query and your client_id for unspash API request
+    client_id = '' # add your client id from unsplash dev page
+    url = "https://api.unsplash.com/photos/random?topics=spirituality&content_filter=high&query=people&orientation=squarish&client_id={}".format(client_id)
     response = requests.get(url, params=query)
     data = response.json()["urls"]["regular"]
     id = response.json()["id"]
@@ -43,24 +43,19 @@ def linkFetch():
 img_url, users_name = linkFetch()
 response = requests.get(img_url)
 img = Image.open(BytesIO(response.content))
-# img = image.convert("L")
-# img.putalpha(200)
 width, height = img.size
-print('img.width', width, 'img.height', height)
 
 edited_img = ImageDraw.Draw(img)
 fnt = ImageFont.truetype("Ubuntu-R.ttf", 40)
-text = tweets[5].all_text
+text = tweets[1].all_text
 words_cnt = len(tweets)
-print(words_cnt)
 w, h = fnt.getsize(text)
 print('w', w, 'h', h)
 if w > 400:
     w = w/2
     parts = round(w/(width/3))
-    text_line_parts = text.split() #textwrap.wrap(text, parts)
-    chunks = [text_line_parts[x:x+9] for x in range(0, len(text_line_parts), 8)]
-    print(chunks)
+    text_line_parts = text.split()
+    chunks = [text_line_parts[x:x+9] for x in range(0, len(text_line_parts), 7)]
 
 x, y = (width/2, height-height/2)
 
@@ -69,13 +64,13 @@ chunks[-1][-1] = chunks[-1][-1] + '"'
 
 for line in chunks:
     line_size = fnt.getsize(' '.join(line))
-    print('line_size', line_size, 'x', x, 'y', y, 'w', w, 'h', h)
-    edited_img.rectangle((x-line_size[0]/2 -5, y-5, x + line_size[0]/2 +5, y + 5 + h), fill='grey')
+    # text background (uncomment the line under)
+    # edited_img.rectangle((x-line_size[0]/2 -5, y-5, x + line_size[0]/2 +5, y + 5 + h), fill='grey')
     edited_img.text((x-line_size[0]/2,y), ' '.join(line), font=fnt, fill="white", align="center")
     y+=60
 
 # img.putalpha(220)
-img.save("rand.jpg")
+# img.save("rand.jpg")
 # img.show()
 
 
@@ -97,7 +92,8 @@ bot.login(username = "motivationtwitter", password = "")
 # every time after first login
 # bot.login()
 
-credits = 'Photo by {} on Unsplash'.format(users_name)
+# credit author of tweet and image
+credits = 'Tweet by {} on Twitter.\nPhoto by {} on Unsplash'.format(twitter_username, users_name)
 
 bot.upload_photo("rand.jpg", caption=text + '\n\n' + credits)
 
@@ -136,4 +132,3 @@ os.rename("rand.jpg.REMOVE_ME", "rand.jpg")
 
 # instagram
 # pip3 install instabot
-
