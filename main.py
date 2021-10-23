@@ -41,16 +41,17 @@ def linkFetch():
 img_url = linkFetch()
 response = requests.get(img_url)
 img = Image.open(BytesIO(response.content))
+# img = image.convert("L")
+# img.putalpha(200)
 width, height = img.size
 print('img.width', width, 'img.height', height)
-x, y = (width/2, height-height/2)
+
 edited_img = ImageDraw.Draw(img)
-fnt = ImageFont.truetype("Ubuntu-R.ttf", 25)
-text = tweets[3].all_text
+fnt = ImageFont.truetype("Ubuntu-R.ttf", 35)
+text = tweets[5].all_text
 words_cnt = len(tweets)
 print(words_cnt)
-# text = "Hello world"
-# TODO: add new line in text if it is too long 
+# TODO: add new line in text if it is too long
 w, h = fnt.getsize(text)
 print('w', w, 'h', h)
 if w > 400:
@@ -60,12 +61,21 @@ if w > 400:
     chunks = [text_line_parts[x:x+9] for x in range(0, len(text_line_parts), 9)]
     print(chunks)
 
+x, y = (width/2, height-height/2)
+
+chunks[0][0] = '"' + chunks[0][0]
+chunks[-1][-1] = chunks[-1][-1] + '"'
+
 for line in chunks:
-    edited_img.rectangle((x-5-w/2, y-5, x + 5 + w/2, y + 5 + h), fill='grey')
-    edited_img.text((x-w/2,y), ' '.join(line), font=fnt, fill="white", align="center")
+    line_size = fnt.getsize(' '.join(line))
+    print('line_size', line_size, 'x', x, 'y', y, 'w', w, 'h', h)
+    edited_img.rectangle((x-line_size[0]/2 -5, y-5, x + line_size[0]/2 +5, y + 5 + h), fill='grey')
+    edited_img.text((x-line_size[0]/2,y), ' '.join(line), font=fnt, fill="white", align="center")
     y+=60
 
-img.show()
+# img.putalpha(220)
+# img.save("black.png")
+# img.show()
 
 
 # install searchtweets
@@ -93,3 +103,8 @@ img.show()
 # https://unsplash.com/oauth/applications
 
 # make requests using rest api
+
+
+# instagram
+# pip3 install instabot
+
