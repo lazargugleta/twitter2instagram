@@ -3,21 +3,21 @@ from searchtweets import load_credentials, collect_results, gen_rule_payload
 # twitter part
 
 # load_credentials(filename="./search_tweets_creds_example.yaml",
-#                  yaml_key="search_tweets_ent_example",
-#                  env_overwrite=False)
-
-
-# premium_search_args = load_credentials(filename="./search_tweets_creds.yaml",
 #                  yaml_key="search_tweets_premium",
 #                  env_overwrite=False)
 
-# rule = gen_rule_payload("from:orangebook_", results_per_call=10) # testing with a sandbox account
-# print(rule)
+
+premium_search_args = load_credentials(filename="./search_tweets_creds.yaml",
+                 yaml_key="search_tweets_premium",
+                 env_overwrite=False)
+
+rule = gen_rule_payload("from:orangebook_", results_per_call=10) # testing with a sandbox account
+print(rule)
 
 
-# tweets = collect_results(rule,
-#                          max_results=10,
-#                          result_stream_args=premium_search_args) # change this if you need to
+tweets = collect_results(rule,
+                         max_results=10,
+                         result_stream_args=premium_search_args) # change this if you need to
 
 # [print(tweet.all_text, end='\n\n') for tweet in tweets[0:10]]
 
@@ -25,6 +25,7 @@ from searchtweets import load_credentials, collect_results, gen_rule_payload
 # unsplash part
 
 import requests
+import textwrap
 from PIL import Image, ImageDraw, ImageFont
 from io import BytesIO
 
@@ -44,14 +45,26 @@ width, height = img.size
 print('img.width', width, 'img.height', height)
 x, y = (width/2, height-height/2)
 edited_img = ImageDraw.Draw(img)
-fnt = ImageFont.truetype("Ubuntu-R.ttf", 30)
-# text = tweets[1].all_text
-text = "Hello world"
+fnt = ImageFont.truetype("Ubuntu-R.ttf", 25)
+text = tweets[3].all_text
+words_cnt = len(tweets)
+print(words_cnt)
+# text = "Hello world"
 # TODO: add new line in text if it is too long 
 w, h = fnt.getsize(text)
 print('w', w, 'h', h)
-edited_img.rectangle((x-5-w/2, y-5, x + 5 + w/2, y + 5 + h), fill='grey')
-edited_img.text((x-w/2,y), text, font=fnt, fill="white", align="center")
+if w > 400:
+    w = w/2
+    parts = round(w/(width/3))
+    text_line_parts = text.split() #textwrap.wrap(text, parts)
+    chunks = [text_line_parts[x:x+9] for x in range(0, len(text_line_parts), 9)]
+    print(chunks)
+
+for line in chunks:
+    edited_img.rectangle((x-5-w/2, y-5, x + 5 + w/2, y + 5 + h), fill='grey')
+    edited_img.text((x-w/2,y), ' '.join(line), font=fnt, fill="white", align="center")
+    y+=60
+
 img.show()
 
 
