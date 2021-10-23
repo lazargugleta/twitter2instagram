@@ -36,9 +36,11 @@ def linkFetch():
     url = "https://api.unsplash.com/photos/random?topics=spirituality&content_filter=high&query=people&orientation=squarish&client_id=4PpAlHOuRvO4mse8lIdiTVGUcKUgpNKHVcVSHReIhP0"
     response = requests.get(url, params=query)
     data = response.json()["urls"]["regular"]
-    return data
+    id = response.json()["id"]
+    users_name = response.json()["user"]["name"]
+    return data, users_name
 
-img_url = linkFetch()
+img_url, users_name = linkFetch()
 response = requests.get(img_url)
 img = Image.open(BytesIO(response.content))
 # img = image.convert("L")
@@ -47,18 +49,17 @@ width, height = img.size
 print('img.width', width, 'img.height', height)
 
 edited_img = ImageDraw.Draw(img)
-fnt = ImageFont.truetype("Ubuntu-R.ttf", 35)
+fnt = ImageFont.truetype("Ubuntu-R.ttf", 40)
 text = tweets[5].all_text
 words_cnt = len(tweets)
 print(words_cnt)
-# TODO: add new line in text if it is too long
 w, h = fnt.getsize(text)
 print('w', w, 'h', h)
 if w > 400:
     w = w/2
     parts = round(w/(width/3))
     text_line_parts = text.split() #textwrap.wrap(text, parts)
-    chunks = [text_line_parts[x:x+9] for x in range(0, len(text_line_parts), 9)]
+    chunks = [text_line_parts[x:x+9] for x in range(0, len(text_line_parts), 8)]
     print(chunks)
 
 x, y = (width/2, height-height/2)
@@ -74,8 +75,36 @@ for line in chunks:
     y+=60
 
 # img.putalpha(220)
-# img.save("black.png")
+img.save("rand.jpg")
 # img.show()
+
+
+# INSTAGRAM
+
+import os 
+# removes cookies If used multiple times to login
+import glob
+try:
+    cookie_del = glob.glob("config/*cookie.json")
+    os.remove(cookie_del[0])
+except:
+    print('No cookies to be deleted')
+
+from instabot import Bot
+bot = Bot()
+bot.login(username = "motivationtwitter", password = "")
+
+# every time after first login
+# bot.login()
+
+credits = 'Photo by {} on Unsplash'.format(users_name)
+
+bot.upload_photo("rand.jpg", caption=text + '\n\n' + credits)
+
+
+
+# rename file back to original name
+os.rename("rand.jpg.REMOVE_ME", "rand.jpg")
 
 
 # install searchtweets
