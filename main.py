@@ -7,16 +7,16 @@ from searchtweets import load_credentials, collect_results, gen_rule_payload
 #                  env_overwrite=False)
 
 
-# premium_search_args = load_credentials(filename="./search_tweets_creds.yaml",
-#                  yaml_key="search_tweets_premium",
-#                  env_overwrite=False)
+premium_search_args = load_credentials(filename="./search_tweets_creds.yaml",
+                 yaml_key="search_tweets_premium",
+                 env_overwrite=False)
 twitter_username = 'orangebook_'
-# rule = gen_rule_payload("from:{}".format(twitter_username), results_per_call=10) # testing with a sandbox account
+rule = gen_rule_payload("from:{}".format(twitter_username), results_per_call=10) # testing with a sandbox account
 
 
-# tweets = collect_results(rule,
-#                          max_results=10,
-#                          result_stream_args=premium_search_args) # change this if you need to
+tweets = collect_results(rule,
+                         max_results=10,
+                         result_stream_args=premium_search_args) # change this if you need to
 
 
 
@@ -55,7 +55,6 @@ def linkFetch():
 img_url, users_name = linkFetch()
 response = requests.get(img_url)
 img = Image.open(BytesIO(response.content))
-# img = reduce_opacity(image, 0.7)
 width, height = img.size
 img.save("randOrig.jpg")
 
@@ -64,12 +63,12 @@ enhancer = ImageEnhance.Brightness(img)
 img = enhancer.enhance(0.6)
 
 edited_img = ImageDraw.Draw(img)
-fnt = ImageFont.truetype("Ubuntu-R.ttf", 43)
-# text = tweets[6].all_text
-text = "It always looks simple when you are not invested personally and are just watching from outside."
+fnt = ImageFont.truetype("Ubuntu-R.ttf", 45)
+# first tweet from last ten, but can make a loop and do this multiple times for different tweets
+text = tweets[0].all_text
+# text = "It always looks simple when you are not invested personally and are just watching from outside."
 words_cnt = len(text.split(' '))
 w, h = fnt.getsize(text)
-print('w', w, 'h', h)
 if w > 400:
     w = w/2
     parts = round(w/(width/3))
@@ -88,15 +87,12 @@ chunks[-1][-1] = chunks[-1][-1] + '"'
 
 for line in chunks:
     line_size = fnt.getsize(' '.join(line))
-    # text background (uncomment the line under)
+    # text background rectangle (uncomment the line under)
     # edited_img.rectangle((x-line_size[0]/2 -5, y-5, x + line_size[0]/2 +5, y + 5 + h), fill='grey')
     edited_img.text((x-line_size[0]/2,y), ' '.join(line), font=fnt, fill="white", align="center")
     y+=60
 
-# png = img
-# img.save("rand.png")
-img = img.convert('RGB')
-# img.paste(png,png)
+# img = img.convert('RGB')
 img.save("rand.jpg")
 
 # Instagram filters
@@ -124,8 +120,7 @@ except:
 
 from instabot import Bot
 bot = Bot()
-bot.login(username = "motivationtwitter", password = "")
-
+bot.login(username = "", password = "") # add your accounts username and passwords
 # every time after first login
 # bot.login()
 
@@ -133,8 +128,6 @@ bot.login(username = "motivationtwitter", password = "")
 credits = 'Tweet by {} on Twitter.\nPhoto by {} on Unsplash'.format(twitter_username, users_name)
 
 bot.upload_photo("rand.jpg", caption=text + '\n\n' + credits)
-
-
 
 # rename file back to original name
 os.rename("rand.jpg.REMOVE_ME", "rand.jpg")
