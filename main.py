@@ -1,4 +1,5 @@
 from searchtweets import load_credentials, collect_results, gen_rule_payload
+from creds import twitter_username, instagram_username, instagram_password, client_id
 
 # twitter part
 
@@ -10,7 +11,6 @@ from searchtweets import load_credentials, collect_results, gen_rule_payload
 premium_search_args = load_credentials(filename="./search_tweets_creds.yaml",
                  yaml_key="search_tweets_premium",
                  env_overwrite=False)
-twitter_username = 'orangebook_'
 rule = gen_rule_payload("from:{}".format(twitter_username), results_per_call=10) # testing with a sandbox account
 
 
@@ -44,7 +44,7 @@ def linkFetch():
     query = "office"
     orientation = "squarish"
     # set different topics, query and your client_id for unspash API request
-    client_id = '' # add your client id from unsplash dev page
+    # add your client id from unsplash dev page to creds.py
     url = "https://api.unsplash.com/photos/random?topics=spirituality&content_filter=high&query=people&orientation=squarish&client_id={}".format(client_id)
     response = requests.get(url, params=query)
     data = response.json()["urls"]["regular"]
@@ -120,7 +120,7 @@ except:
 
 from instabot import Bot
 bot = Bot()
-bot.login(username = "motivationtweeter", password = "") # add your accounts username and passwords
+bot.login(username = instagram_username, password = instagram_password) # add your accounts username and passwords to creds.py
 # every time after first login
 # bot.login()
 
