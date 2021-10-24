@@ -7,24 +7,36 @@ from searchtweets import load_credentials, collect_results, gen_rule_payload
 #                  env_overwrite=False)
 
 
-premium_search_args = load_credentials(filename="./search_tweets_creds.yaml",
-                 yaml_key="search_tweets_premium",
-                 env_overwrite=False)
+# premium_search_args = load_credentials(filename="./search_tweets_creds.yaml",
+#                  yaml_key="search_tweets_premium",
+#                  env_overwrite=False)
 twitter_username = 'orangebook_'
-rule = gen_rule_payload("from:{}".format(twitter_username), results_per_call=10) # testing with a sandbox account
+# rule = gen_rule_payload("from:{}".format(twitter_username), results_per_call=10) # testing with a sandbox account
 
 
-tweets = collect_results(rule,
-                         max_results=10,
-                         result_stream_args=premium_search_args) # change this if you need to
+# tweets = collect_results(rule,
+#                          max_results=10,
+#                          result_stream_args=premium_search_args) # change this if you need to
 
 
+
+def reduce_opacity(im, opacity):
+    """Returns an image with reduced opacity."""
+    assert opacity >= 0 and opacity <= 1
+    if im.mode != 'RGBA':
+        im = im.convert('RGBA')
+    else:
+        im = im.copy()
+    alpha = im.split()[3]
+    alpha = ImageEnhance.Brightness(alpha).enhance(opacity)
+    im.putalpha(alpha)
+    return im
 
 # unsplash part
 
 import requests
 import textwrap
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageEnhance
 from io import BytesIO
 
 
@@ -32,7 +44,7 @@ def linkFetch():
     query = "office"
     orientation = "squarish"
     # set different topics, query and your client_id for unspash API request
-    client_id = '' # add your client id from unsplash dev page
+    client_id = '4PpAlHOuRvO4mse8lIdiTVGUcKUgpNKHVcVSHReIhP0' # add your client id from unsplash dev page
     url = "https://api.unsplash.com/photos/random?topics=spirituality&content_filter=high&query=people&orientation=squarish&client_id={}".format(client_id)
     response = requests.get(url, params=query)
     data = response.json()["urls"]["regular"]
@@ -43,24 +55,36 @@ def linkFetch():
 img_url, users_name = linkFetch()
 response = requests.get(img_url)
 img = Image.open(BytesIO(response.content))
+# img = reduce_opacity(image, 0.7)
 width, height = img.size
+img.save("randOrig.jpg")
+
+# reduce brighness
+enhancer = ImageEnhance.Brightness(img)
+img = enhancer.enhance(0.6)
 
 edited_img = ImageDraw.Draw(img)
-fnt = ImageFont.truetype("Ubuntu-R.ttf", 40)
-text = tweets[1].all_text
-words_cnt = len(tweets)
+fnt = ImageFont.truetype("Ubuntu-R.ttf", 43)
+# text = tweets[6].all_text
+text = "It always looks simple when you are not invested personally and are just watching from outside."
+words_cnt = len(text.split(' '))
 w, h = fnt.getsize(text)
 print('w', w, 'h', h)
 if w > 400:
     w = w/2
     parts = round(w/(width/3))
     text_line_parts = text.split()
-    chunks = [text_line_parts[x:x+9] for x in range(0, len(text_line_parts), 7)]
+    chunks = [text_line_parts[x:x+7] for x in range(0, len(text_line_parts), 7)]
 
 x, y = (width/2, height-height/2)
 
+# add quotes at the beginning and end of the quote
 chunks[0][0] = '"' + chunks[0][0]
 chunks[-1][-1] = chunks[-1][-1] + '"'
+
+
+
+# im_output.save('darkened-image.jpg')
 
 for line in chunks:
     line_size = fnt.getsize(' '.join(line))
@@ -69,10 +93,23 @@ for line in chunks:
     edited_img.text((x-line_size[0]/2,y), ' '.join(line), font=fnt, fill="white", align="center")
     y+=60
 
-# img.putalpha(220)
-# img.save("rand.jpg")
+# png = img
+# img.save("rand.png")
+img = img.convert('RGB')
+# img.paste(png,png)
+img.save("rand.jpg")
+
+# Instagram filters
+# from instafilter import Instafilter
+# model = Instafilter("Gingham")
+# new_image = model("rand.jpg")
+# import cv2
+# cv2.imwrite("rand.jpg", new_image)
 # img.show()
 
+# further ideas 
+# -> figure out the background of your photo and than add text according to it
+# -> add background shapes to text
 
 # INSTAGRAM
 
@@ -101,6 +138,9 @@ bot.upload_photo("rand.jpg", caption=text + '\n\n' + credits)
 
 # rename file back to original name
 os.rename("rand.jpg.REMOVE_ME", "rand.jpg")
+
+
+
 
 
 # install searchtweets
