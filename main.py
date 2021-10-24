@@ -44,7 +44,7 @@ def linkFetch():
     query = "office"
     orientation = "squarish"
     # set different topics, query and your client_id for unspash API request
-    client_id = '4PpAlHOuRvO4mse8lIdiTVGUcKUgpNKHVcVSHReIhP0' # add your client id from unsplash dev page
+    client_id = '' # add your client id from unsplash dev page
     url = "https://api.unsplash.com/photos/random?topics=spirituality&content_filter=high&query=people&orientation=squarish&client_id={}".format(client_id)
     response = requests.get(url, params=query)
     data = response.json()["urls"]["regular"]
@@ -120,7 +120,7 @@ except:
 
 from instabot import Bot
 bot = Bot()
-bot.login(username = "", password = "") # add your accounts username and passwords
+bot.login(username = "motivationtweeter", password = "") # add your accounts username and passwords
 # every time after first login
 # bot.login()
 
