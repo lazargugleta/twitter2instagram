@@ -1,4 +1,4 @@
-from searchtweets import load_credentials, collect_results, gen_request_parameters, ResultStream
+from searchtweets import load_credentials, gen_request_parameters, ResultStream
 from creds import twitter_username, instagram_username, instagram_password, client_id
 import os
 from instabot import Bot
@@ -27,8 +27,6 @@ def getTweets(number_of_tweets):
                     **search_args)
 
     tweets = list(rs.stream())
-
-    # print(tweets[0]["data"][0]["text"])
 
     return [tweets[0]["data"][i]["text"] for i in range(0, number_of_tweets)]
 
@@ -86,9 +84,7 @@ def makePost(text, instaBot):
     twitter_logo = Image.open("twitter.png")
     unsplash_logo = Image.open("unsplash.png")
     # text = "If you are the smartest person in the room, you are in the wrong room."
-    # words_cnt = len(text.split(" "))
     w, h = fnt.getsize(text)
-    print('w', w, 'h', h)
     if w > 400:
         w = w / 2
         parts = round(w / (width / 3))
@@ -142,8 +138,8 @@ def makePost(text, instaBot):
     # img.show()
 
     # credit author of tweet and image
-    credits = "Tweet by {} on Twitter.\nPhoto by {} on Unsplash\n\nLink to photo: {}".format(
-        twitter_username, users_name, img_url
+    credits = "Tweet by {} on Twitter.\nPhoto by {} on Unsplash".format(
+        twitter_username, users_name
     )
 
     instaBot.upload_photo("rand.jpg", caption=text + "\n\n" + credits)
@@ -156,10 +152,10 @@ texts = getTweets(10)
 # flow
 instaBot = loginInstagram()
 # texts = "We develop low-level addictions to junk that fuels our insecurities: junk information, junk activities, junk friends. Quitting means exposing emotions and triggering weird cravings but the goal is to stay focused on things that add value to your life."
-# instaBot = ""
 for text in texts:
+    print(text)
     makePost(text, instaBot)
-print("Script complete check instagram to see the posts")
+print("Script complete check instagram to see the posts {}".format("https://instagram.com/" + instagram_username))
 
 
 # further ideas
@@ -171,12 +167,14 @@ print("Script complete check instagram to see the posts")
 
 
 # install searchtweets
-# pip install searchtweets
+# pip install searchtweets-v2 
 
 
 # apply for dev account and create app
 # https://developer.twitter.com/apps
 # take key and private key and add them to credentials file
+
+# curl command to add bearer token
 
 # create 30-day or full archive dev environments
 # https://developer.twitter.com/en/account/environments
