@@ -1,4 +1,4 @@
-from searchtweets import load_credentials, collect_results, gen_rule_payload
+from searchtweets import load_credentials, collect_results, gen_request_parameters, ResultStream
 from creds import twitter_username, instagram_username, instagram_password, client_id
 import os
 from instabot import Bot
@@ -11,26 +11,31 @@ from io import BytesIO
 
 def getTweets(number_of_tweets):
 
-    premium_search_args = load_credentials(
+    search_args = load_credentials(
         filename="./search_tweets_creds.yaml",
-        yaml_key="search_tweets_premium",
-        env_overwrite=False,
+        yaml_key="search_tweets_v2",
+        env_overwrite=True,
     )
+
     # testing with a sandbox account
-    rule = gen_rule_payload(
-        "from:{}".format(twitter_username), results_per_call=number_of_tweets
+    query = gen_request_parameters(
+        "from:{}".format(twitter_username), results_per_call = number_of_tweets, granularity=None
     )
 
-    tweets = collect_results(
-        rule, max_results=number_of_tweets, result_stream_args=premium_search_args
-    )
+    rs = ResultStream(request_parameters=query,
+                    max_results=number_of_tweets,
+                    **search_args)
 
-    return [tweets[i].all_text for i in range(0, number_of_tweets)]
+    tweets = list(rs.stream())
+
+    # print(tweets[0]["data"][0]["text"])
+
+    return [tweets[0]["data"][i]["text"] for i in range(0, number_of_tweets)]
 
 
-# unsplash part
+# Unsplash
 
-def linkFetch():
+def getImage():
     query = "office"
     orientation = "squarish"
     # set different topics, query and your client_id for unspash API request
@@ -40,10 +45,13 @@ def linkFetch():
     )
     response = requests.get(url, params=query)
     data = response.json()["urls"]["regular"]
-    id = response.json()["id"]
+    # id = response.json()["id"]
     users_name = response.json()["user"]["name"]
-    return data, users_name
+    img = Image.open(BytesIO(requests.get(data).content))
 
+    return img, data, users_name
+
+# Instagram
 
 def loginInstagram():
 
@@ -67,9 +75,7 @@ def loginInstagram():
 
 def makePost(text, instaBot):
     # get image
-    img_url, users_name = linkFetch()
-    response = requests.get(img_url)
-    img = Image.open(BytesIO(response.content))
+    img, img_url, users_name = getImage()
     width, height = img.size
 
     # reduce brighness
@@ -77,20 +83,31 @@ def makePost(text, instaBot):
     img = enhancer.enhance(0.6)
     edited_img = ImageDraw.Draw(img)
     fnt = ImageFont.truetype("Ubuntu-R.ttf", 45)
+    twitter_logo = Image.open("twitter.png")
+    unsplash_logo = Image.open("unsplash.png")
     # text = "If you are the smartest person in the room, you are in the wrong room."
-    words_cnt = len(text.split(" "))
+    # words_cnt = len(text.split(" "))
     w, h = fnt.getsize(text)
+    print('w', w, 'h', h)
     if w > 400:
         w = w / 2
         parts = round(w / (width / 3))
         text_line_parts = text.split()
         chunks = [text_line_parts[x : x + 7] for x in range(0, len(text_line_parts), 7)]
 
+    for chunk in chunks:
+        if fnt.getsize(" ".join(chunk))[0] >= (img.width - 50):
+            chunks = [text_line_parts[x : x + 6] for x in range(0, len(text_line_parts), 6)]
+            break
+
+    # get center
     x, y = (width / 2, height - height / 2)
 
     # add quotes at the beginning and end of the quote
     chunks[0][0] = '"' + chunks[0][0]
     chunks[-1][-1] = chunks[-1][-1] + '"'
+    number_of_chunks = len(chunks)
+    y -= int(round(number_of_chunks/2 * 50))
 
     for line in chunks:
         line_size = fnt.getsize(" ".join(line))
@@ -105,7 +122,15 @@ def makePost(text, instaBot):
         )
         y += 60
 
-    # img = img.convert('RGB')
+    # twitter and unsplash logos for the handles of the authors
+    img.paste(twitter_logo, (int(round(x)) - 155, int(round(height))-130), twitter_logo)
+    img.paste(unsplash_logo, (int(round(x)) - 155, int(round(height))-70), unsplash_logo)
+
+    # resize font
+    fnt = ImageFont.truetype("Ubuntu-R.ttf", 30)
+    edited_img.text((int(round(x)) - 100, int(round(height))-125), "@" + twitter_username, font = fnt, fill="white", align="center")
+    edited_img.text((int(round(x)) - 100, int(round(height))-65), "@" + users_name, font = fnt, fill="white", align="center")
+
     img.save("rand.jpg")
 
     # Instagram filters
@@ -117,8 +142,8 @@ def makePost(text, instaBot):
     # img.show()
 
     # credit author of tweet and image
-    credits = "Tweet by {} on Twitter.\nPhoto by {} on Unsplash".format(
-        twitter_username, users_name
+    credits = "Tweet by {} on Twitter.\nPhoto by {} on Unsplash\n\nLink to photo: {}".format(
+        twitter_username, users_name, img_url
     )
 
     instaBot.upload_photo("rand.jpg", caption=text + "\n\n" + credits)
@@ -130,11 +155,15 @@ def makePost(text, instaBot):
 texts = getTweets(10)
 # flow
 instaBot = loginInstagram()
+# texts = "We develop low-level addictions to junk that fuels our insecurities: junk information, junk activities, junk friends. Quitting means exposing emotions and triggering weird cravings but the goal is to stay focused on things that add value to your life."
+# instaBot = ""
 for text in texts:
     makePost(text, instaBot)
+print("Script complete check instagram to see the posts")
 
 
 # further ideas
+# -> write queries for each of the functions (number of tweets, user to get tweets from, unplash query photo criteria, instagram auto/manual login (if it exists in the creds file))
 # -> figure out the background of your photo and than add text according to it
 # -> add background shapes to text and personalize it however you like
 # -> add tweet and photo authors on the bottom of the photo
