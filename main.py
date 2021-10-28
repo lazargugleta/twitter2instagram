@@ -120,14 +120,16 @@ def makePost(text, instaBot):
 
     # twitter and unsplash logos for the handles of the authors
     img.paste(twitter_logo, (int(round(x)) - 155, int(round(height))-130), twitter_logo)
-    img.paste(unsplash_logo, (int(round(x)) - 155, int(round(height))-70), unsplash_logo)
+    img.paste(unsplash_logo, (int(round(x)) - 157, int(round(height))-70), unsplash_logo)
 
+    # credits at the bottom of the image
     # resize font
     fnt = ImageFont.truetype("Ubuntu-R.ttf", 30)
+    
     edited_img.text((int(round(x)) - 100, int(round(height))-125), "@" + twitter_username, font = fnt, fill="white", align="center")
     edited_img.text((int(round(x)) - 100, int(round(height))-65), "@" + users_name, font = fnt, fill="white", align="center")
 
-    img.save("rand.jpg")
+    img.save("post.jpg")
 
     # Instagram filters
     # from instafilter import Instafilter
@@ -138,14 +140,14 @@ def makePost(text, instaBot):
     # img.show()
 
     # credit author of tweet and image
-    credits = "Tweet by {} on Twitter.\nPhoto by {} on Unsplash".format(
+    credits = "Tweet by @{} on Twitter.\nPhoto by {} on Unsplash".format(
         twitter_username, users_name
     )
 
-    instaBot.upload_photo("rand.jpg", caption=text + "\n\n" + credits)
+    instaBot.upload_photo("post.jpg", caption=text + "\n\n" + credits)
 
     # rename file back to original name
-    os.rename("rand.jpg.REMOVE_ME", "rand.jpg")
+    os.rename("post.jpg.REMOVE_ME", "post.jpg")
 
 
 texts = getTweets(10)
