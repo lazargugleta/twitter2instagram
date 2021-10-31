@@ -1,5 +1,5 @@
 from searchtweets import load_credentials, gen_request_parameters, ResultStream
-from creds import twitter_username, instagram_username, instagram_password, client_id
+from creds import instagram_username, instagram_password, client_id
 import os
 from instabot import Bot
 import requests
@@ -10,6 +10,10 @@ from io import BytesIO
 # twitter part
 
 def getTweets(number_of_tweets):
+
+    min_nr_tweets = 10
+    if number_of_tweets < 10:
+        number_of_tweets += min_nr_tweets
 
     search_args = load_credentials(
         filename="./search_tweets_creds.yaml",
@@ -27,7 +31,7 @@ def getTweets(number_of_tweets):
                     **search_args)
 
     tweets = list(rs.stream())
-
+    number_of_tweets -= min_nr_tweets
     return [tweets[0]["data"][i]["text"] for i in range(0, number_of_tweets)]
 
 
@@ -118,14 +122,13 @@ def makePost(text, instaBot):
         )
         y += 60
 
+    # credits at the bottom of the image
     # twitter and unsplash logos for the handles of the authors
     img.paste(twitter_logo, (int(round(x)) - 155, int(round(height))-130), twitter_logo)
     img.paste(unsplash_logo, (int(round(x)) - 157, int(round(height))-70), unsplash_logo)
 
-    # credits at the bottom of the image
     # resize font
     fnt = ImageFont.truetype("Ubuntu-R.ttf", 30)
-    
     edited_img.text((int(round(x)) - 100, int(round(height))-125), "@" + twitter_username, font = fnt, fill="white", align="center")
     edited_img.text((int(round(x)) - 100, int(round(height))-65), "@" + users_name, font = fnt, fill="white", align="center")
 
@@ -149,8 +152,10 @@ def makePost(text, instaBot):
     # rename file back to original name
     os.rename("post.jpg.REMOVE_ME", "post.jpg")
 
+twitter_username = input("Enter the twitter username: @")
+number_of_tweets = int(input("Enter the number of tweets: "))
 
-texts = getTweets(10)
+texts = getTweets(number_of_tweets)
 # flow
 instaBot = loginInstagram()
 # texts = "We develop low-level addictions to junk that fuels our insecurities: junk information, junk activities, junk friends. Quitting means exposing emotions and triggering weird cravings but the goal is to stay focused on things that add value to your life."
