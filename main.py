@@ -89,10 +89,14 @@ def makePost(text, instaBot):
     unsplash_logo = Image.open("unsplash.png")
     # text = "If you are the smartest person in the room, you are in the wrong room."
     w, h = fnt.getsize(text)
+    text_line_parts = text.split()
+    if text_line_parts[0] == "RT" and text_line_parts[1][0] == "@":
+        text_line_parts = text_line_parts[2:len(text_line_parts)]
+        text = " ".join(text_line_parts)
+
     if w > 400:
         w = w / 2
         parts = round(w / (width / 3))
-        text_line_parts = text.split()
         chunks = [text_line_parts[x : x + 7] for x in range(0, len(text_line_parts), 7)]
 
     for chunk in chunks:
@@ -166,12 +170,15 @@ print("Script complete check instagram to see the posts {}".format("https://inst
 
 
 # further ideas
+# -> check if the twitter username is written properly
 # -> write queries for each of the functions (number of tweets, user to get tweets from, unplash query photo criteria, instagram auto/manual login (if it exists in the creds file))
 # -> figure out the background of your photo and than add text according to it
 # -> add background shapes to text and personalize it however you like
 # -> add tweet and photo authors on the bottom of the photo
-# -> move text a bit up when it is long 
+# -> filter tweets from keywords (e.g. threads or Retweets)
+# -> move text a bit up when it is long // DONE
 
+# HOW TO INSTALL AND USE
 
 # install searchtweets
 # pip install searchtweets-v2 
