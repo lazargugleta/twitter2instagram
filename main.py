@@ -23,7 +23,7 @@ def getTweets(number_of_tweets):
 
     # testing with a sandbox account
     query = gen_request_parameters(
-        "from:{}".format(twitter_username), results_per_call = number_of_tweets, granularity=None
+        "from:{} -is:retweet -is:reply".format(twitter_username), results_per_call = number_of_tweets, granularity=None
     )
 
     rs = ResultStream(request_parameters=query,
@@ -162,20 +162,19 @@ number_of_tweets = int(input("Enter the number of tweets: "))
 texts = getTweets(number_of_tweets)
 # flow
 instaBot = loginInstagram()
-# texts = "We develop low-level addictions to junk that fuels our insecurities: junk information, junk activities, junk friends. Quitting means exposing emotions and triggering weird cravings but the goal is to stay focused on things that add value to your life."
 for text in texts:
-    print(text)
     makePost(text, instaBot)
 print("Script complete check instagram to see the posts {}".format("https://instagram.com/" + instagram_username))
 
 
 # further ideas
 # -> check if the twitter username is written properly
+# -> enter multiple twitter usernames (recursion and if not break)
 # -> write queries for each of the functions (number of tweets, user to get tweets from, unplash query photo criteria, instagram auto/manual login (if it exists in the creds file))
 # -> figure out the background of your photo and than add text according to it
 # -> add background shapes to text and personalize it however you like
 # -> add tweet and photo authors on the bottom of the photo
-# -> filter tweets from keywords (e.g. threads or Retweets)
+# -> filter tweets from keywords (e.g. threads)
 # -> move text a bit up when it is long // DONE
 
 # HOW TO INSTALL AND USE
