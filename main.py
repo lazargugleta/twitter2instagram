@@ -23,7 +23,7 @@ def getTweets(number_of_tweets):
 
     # testing with a sandbox account
     query = gen_request_parameters(
-        "from:{} -is:retweet -is:reply".format(twitter_username), results_per_call = number_of_tweets, granularity=None
+        "from:{} -is:retweet -is:reply -has:mentions".format(twitter_username), results_per_call = number_of_tweets, granularity=None
     )
 
     rs = ResultStream(request_parameters=query,
@@ -82,7 +82,7 @@ def makePost(text, instaBot):
 
     # reduce brighness
     enhancer = ImageEnhance.Brightness(img)
-    img = enhancer.enhance(0.6)
+    img = enhancer.enhance(0.55 )
     edited_img = ImageDraw.Draw(img)
     fnt = ImageFont.truetype("Ubuntu-R.ttf", 45)
     twitter_logo = Image.open("twitter.png")
