@@ -9,7 +9,7 @@ from io import BytesIO
 
 # twitter part
 
-def getTweets(number_of_tweets):
+def getTweets(twitter_username, number_of_tweets):
 
     min_nr_tweets = 10
     if number_of_tweets < 10:
@@ -46,7 +46,7 @@ def getImage():
         client_id
     )
     response = requests.get(url, params=query)
-    data = response.json()["urls"]["regular"]
+    data = response.json()["urls"]["regular"] #full 
     # id = response.json()["id"]
     users_name = response.json()["user"]["name"]
     img = Image.open(BytesIO(requests.get(data).content))
@@ -75,7 +75,7 @@ def loginInstagram():
     return bot
 
 
-def makePost(text, instaBot):
+def makePost(twitter_username, text, instaBot):
     # get image
     img, img_url, users_name = getImage()
     width, height = img.size
@@ -159,15 +159,25 @@ def makePost(text, instaBot):
 twitter_username = input("Enter the twitter username: @")
 number_of_tweets = int(input("Enter the number of tweets: "))
 
-texts = getTweets(number_of_tweets)
-# flow
-instaBot = loginInstagram()
-for text in texts:
-    makePost(text, instaBot)
-print("Script complete check instagram to see the posts {}".format("https://instagram.com/" + instagram_username))
+def main(twitter_username, number_of_tweets):
+    texts = getTweets(twitter_username, number_of_tweets)
+    
+    for text in texts:
+        makePost(twitter_username, text, instaBot)
+    print("-------------------------------------------")
+    twitter_username_new = input("If you want to create posts from another account, enter the twitter username (otherwise click enter): @")
+    if twitter_username_new == "":
+        print("Script complete check instagram to see the posts {}".format("https://instagram.com/" + instagram_username))
+    else:
+        number_of_tweets_new = int(input("Enter the number of tweets: "))
+        main(twitter_username_new, number_of_tweets_new)
+
+instaBot = loginInstagram()   
+main(twitter_username, number_of_tweets)
 
 
 # further ideas
+# -> automation pipeline to check account for new tweets and creates image automatically every X hours
 # -> check if the twitter username is written properly
 # -> enter multiple twitter usernames (recursion and if not break)
 # -> write queries for each of the functions (number of tweets, user to get tweets from, unplash query photo criteria, instagram auto/manual login (if it exists in the creds file))
