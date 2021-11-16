@@ -175,6 +175,8 @@ def main(twitter_username, number_of_tweets):
 instaBot = loginInstagram()   
 main(twitter_username, number_of_tweets)
 
+# suggested accounts to get motivation from
+# WealthFoodLife, PerfectGuide_, orangebook_, SalesNotepad
 
 # further ideas
 # -> automation pipeline to check account for new tweets and creates image automatically every X hours
